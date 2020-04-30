@@ -1,3 +1,0 @@
-#to run venv, in terminal run
-
-source $(cat activatePath)
