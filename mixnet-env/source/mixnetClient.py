@@ -1,55 +1,48 @@
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.fernet import Fernet
+import os
+import base64
+from cryptography.hazmat.backends.openssl.rsa import _RSAPublicKey as rsapk
 
-def parseKeys(filePath=None):
-	"""parses the crypto keys either through the provide filePath var, or 
-		through the predetermined file path, which is ../pems/. 
-		Returns a dictionary of 3 elements, containing the keys for mixes 
-		1 to 3"""
-	print("Parsing crypto keys")
-	print("filePath is: " + str(filePath))
-
-	keysDict = dict()
-	for i in range(1, 4):
-		path="../pems/public-key-mix-"+str(i)+".pem"
-		print("getting key: " + path)
-		with open(path, "rb") as key_file:
-			public_key = serialization.load_pem_public_key(
-				key_file.read(),
-				backend=default_backend()
-			)
-			if public_key is not None:
-				keysDict[i] = public_key
-				print("public key is " + str(public_key))
-			"""key = o.read()
-			if key is not None : 
-				key = key.replace("-", "").replace("BEGIN", "").replace("END", "").replace("PUBLIC KEY", "").replace("\n", "").strip()
-				keysDict[i] = key
-			else:
-				print("key of " + str(i) + "is None.")
-				continue"""
-	return keysDict			
-
+#done
 def buildMessage() :
 	"""Builds the requested unencrypted message"""
-	return "Alice,16"
+	return ("Alice,16", "Frank,16", "Charlie,16")
+
+def encryptAes(key, message: str):
+	'''applies AES encryption.'''
+	print("encrypting AES")
+	fernet=Fernet(key)
+	return fernet.encrypt(message.encode())
+	
+def encryptRSA(key, message):
+	'''applies RSA encryption'''
+	pass
 
 def encryptMessage(message, keys):
 	"""encrypts the message based on the given algo"""
-	encrypted = keys[3].encrypt(message,
-	padding.OAEP(
-		)
-	)
+	for string in message:
+		pass
 
-	for i in range(3, 0, -1):
-		message=keys[i].encrypt(message)
-
-
-def appendLength(encryptedMessage):
+def appendLength(encryptedMessages):
+	'''prepends 4 bytes of length to each message in encryptedMessages'''
 	pass
 
-def sendMessage(port, encryptedMessage):
+def sendMessage(port, encryptedMessages):
+	'''send the encrypted messages'''
 	pass
 
-encryptMessage(None, None)
-#sendMessage(1234, appendLength(encryptMessage(parseKeys, buildMessage)))
+print("debug")
+key1="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAp04ZWyGbJtmm4/tDvo2Y \
+AcpBhJGLdevLYrjr1egh7L0riog5AshZJHfbP7qiIWl7CTtdtfgWw1lGVdEWyZFn \
+qiOUvKVIg/i+EeKQqsoJSbJW0dhM/jny3N1D18q35tJ+JT+16rzmBoJLDJ0yDZjJ \
+ueapbOD4vZrRqri+b20qNZPq//FlKarvEg3wAAc4HIxk5afz3Pc8tbjCPvcV3i+z \
+8a9ao/vBHLMl/vi75LFcPPX1U74e43iBBvFnFqmSUYBjSLLp5xeQtKoz5UZ/wX8y \
+qHLRi/eVXUXXPNWIeBd4n395tT0C5vmlKZztE+hE1YIO7B2PUkkpGhi//VPzlhPq \
+gQIDAQAB"
+
+message = encryptAes(bytes(base64.urlsafe_b64encode(key1)), "hi there")
+print("message is")
+print(message)
