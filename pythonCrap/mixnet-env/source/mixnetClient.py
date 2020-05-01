@@ -35,14 +35,10 @@ def sendMessage(port, encryptedMessages):
 	pass
 
 print("debug")
-key1="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAp04ZWyGbJtmm4/tDvo2Y \
-AcpBhJGLdevLYrjr1egh7L0riog5AshZJHfbP7qiIWl7CTtdtfgWw1lGVdEWyZFn \
-qiOUvKVIg/i+EeKQqsoJSbJW0dhM/jny3N1D18q35tJ+JT+16rzmBoJLDJ0yDZjJ \
-ueapbOD4vZrRqri+b20qNZPq//FlKarvEg3wAAc4HIxk5afz3Pc8tbjCPvcV3i+z \
-8a9ao/vBHLMl/vi75LFcPPX1U74e43iBBvFnFqmSUYBjSLLp5xeQtKoz5UZ/wX8y \
-qHLRi/eVXUXXPNWIeBd4n395tT0C5vmlKZztE+hE1YIO7B2PUkkpGhi//VPzlhPq \
-gQIDAQAB"
+key1=b'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAp04ZWyGbJtmm4/tDvo2YAcpBhJGLdevLYrjr1egh7L0riog5AshZJHfbP7qiIWl7CTtdtfgWw1lGVdEWyZFnqiOUvKVIg/i+EeKQqsoJSbJW0dhM/jny3N1D18q35tJ+JT+16rzmBoJLDJ0yDZjJueapbOD4vZrRqri+b20qNZPq//FlKarvEg3wAAc4HIxk5afz3Pc8tbjCPvcV3i+z8a9ao/vBHLMl/vi75LFcPPX1U74e43iBBvFnFqmSUYBjSLLp5xeQtKoz5UZ/wX8yqHLRi/eVXUXXPNWIeBd4n395tT0C5vmlKZztE+hE1YIO7B2PUkkpGhi//VPzlhPqgQIDAQAB'
+key1=base64.urlsafe_b64encode(key1)
+print("type is")
 
-message = encryptAes(bytes(base64.urlsafe_b64encode(key1)), "hi there")
+#message = encryptAes(type(base64.urlsafe_b64encode(key1)), "hi there")
 print("message is")
-print(message)
+#print(message)
