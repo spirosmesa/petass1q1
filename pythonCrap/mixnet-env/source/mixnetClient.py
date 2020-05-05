@@ -4,21 +4,13 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.fernet import Fernet
 import os
 import base64
-from cryptography.hazmat.primitives import padding
-from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import padding as pd
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding 
 import os.path as p
 
-#first
-msg = buildPaddedMessage(b"Alice,16")
-aesMsg=encryptAes(msg)
-key=getKey("1")
-rsaMsg = encryptRSA(key, aesMsg)
-#finalMsg=appendLength(rsaMsg)
-#sendMessage(finalMsg)
-
-
 def getKey(key) :
-	keyPath = p.join("..", "pems", "publpublic-key-mix-"+key+".pem")
+	keyPath = p.join("..", "pems", "public-key-mix-"+key+".pem")
 	with open(keyPath, "rb") as key_file:
 		private_key = serialization.load_pem_private_key(
 			key_file.read(),
@@ -30,7 +22,7 @@ def getKey(key) :
 #done
 def buildPaddedMessage(message) :
 	"""Builds the requested unencrypted message"""
-	padder = padding.PKCS7(128).padder()
+	padder = pd.PKCS7(128).padder()
 	#expects byte array
 	return padder.update(message) + padder.finalize()
 
@@ -42,13 +34,15 @@ def encryptAes(message):
 	cipher = Cipher(algorithms.AES(key), modes.CBC(iv), default_backend())
 	encryptor = cipher.encryptor()
 	ct = encryptor.update(message) + encryptor.finalize()
-	return ct
+	return [ct, key, iv]
 
 def encryptRSA(key, message):
-	encrypted = key.encrypt (
+	return key.encrypt (
 		message,
 		padding.OAEP(
-
+			mgf=padding.MGF1(algorithm=hashes.SHA256()),
+			algorithm=hashes.SHA256(),
+			label=None
 		)
 	)
 
@@ -61,3 +55,9 @@ def sendMessage(port, encryptedMessages):
 	pass
 
 #First Step
+msg = buildPaddedMessage(b"Alice,16")
+aesLst=encryptAes(msg)
+key=getKey("1")
+#rsaMsg = encryptRSA(key, aesMsg)
+#finalMsg=appendLength(rsaMsg)
+#sendMessage(finalMsg)
