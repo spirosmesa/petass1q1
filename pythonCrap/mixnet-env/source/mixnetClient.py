@@ -4,27 +4,53 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.fernet import Fernet
 import os
 import base64
-from cryptography.hazmat.backends.openssl.rsa import _RSAPublicKey as rsapk
+from cryptography.hazmat.primitives import padding
+from cryptography.hazmat.primitives.asymmetric import padding
+import os.path as p
+
+#first
+msg = buildPaddedMessage(b"Alice,16")
+aesMsg=encryptAes(msg)
+key=getKey("1")
+rsaMsg = encryptRSA(key, aesMsg)
+#finalMsg=appendLength(rsaMsg)
+#sendMessage(finalMsg)
+
+
+def getKey(key) :
+	keyPath = p.join("..", "pems", "publpublic-key-mix-"+key+".pem")
+	with open(keyPath, "rb") as key_file:
+		private_key = serialization.load_pem_private_key(
+			key_file.read(),
+			password=None,
+			backend=default_backend()
+		)
+	return private_key
 
 #done
-def buildMessage() :
+def buildPaddedMessage(message) :
 	"""Builds the requested unencrypted message"""
-	return ("Alice,16", "Frank,16", "Charlie,16")
+	padder = padding.PKCS7(128).padder()
+	#expects byte array
+	return padder.update(message) + padder.finalize()
 
-def encryptAes(key, message: str):
+def encryptAes(message):
 	'''applies AES encryption.'''
 	print("encrypting AES")
-	fernet=Fernet(key)
-	return fernet.encrypt(message.encode())
-	
-def encryptRSA(key, message):
-	'''applies RSA encryption'''
-	pass
+	key = os.urandom(16)
+	iv = os.urandom(16)
+	cipher = Cipher(algorithms.AES(key), modes.CBC(iv), default_backend())
+	encryptor = cipher.encryptor()
+	ct = encryptor.update(message) + encryptor.finalize()
+	return ct
 
-def encryptMessage(message, keys):
-	"""encrypts the message based on the given algo"""
-	for string in message:
-		pass
+def encryptRSA(key, message):
+	encrypted = key.encrypt (
+		message,
+		padding.OAEP(
+
+		)
+	)
 
 def appendLength(encryptedMessages):
 	'''prepends 4 bytes of length to each message in encryptedMessages'''
@@ -34,11 +60,4 @@ def sendMessage(port, encryptedMessages):
 	'''send the encrypted messages'''
 	pass
 
-print("debug")
-key1=b'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAp04ZWyGbJtmm4/tDvo2YAcpBhJGLdevLYrjr1egh7L0riog5AshZJHfbP7qiIWl7CTtdtfgWw1lGVdEWyZFnqiOUvKVIg/i+EeKQqsoJSbJW0dhM/jny3N1D18q35tJ+JT+16rzmBoJLDJ0yDZjJueapbOD4vZrRqri+b20qNZPq//FlKarvEg3wAAc4HIxk5afz3Pc8tbjCPvcV3i+z8a9ao/vBHLMl/vi75LFcPPX1U74e43iBBvFnFqmSUYBjSLLp5xeQtKoz5UZ/wX8yqHLRi/eVXUXXPNWIeBd4n395tT0C5vmlKZztE+hE1YIO7B2PUkkpGhi//VPzlhPqgQIDAQAB'
-key1=base64.urlsafe_b64encode(key1)
-print("type is")
-
-#message = encryptAes(type(base64.urlsafe_b64encode(key1)), "hi there")
-print("message is")
-#print(message)
+#First Step
