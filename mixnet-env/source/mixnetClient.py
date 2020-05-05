@@ -9,22 +9,20 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding 
 import os.path as p
 
-def getKey(key) :
-	keyPath = p.join("..", "pems", "public-key-mix-"+key+".pem")
-	with open(keyPath, "rb") as key_file:
-		private_key = serialization.load_pem_private_key(
-			key_file.read(),
-			password=None,
-			backend=default_backend()
-		)
-	return private_key
-
 #done
 def buildPaddedMessage(message) :
 	"""Builds the requested unencrypted message"""
 	padder = pd.PKCS7(128).padder()
 	#expects byte array
 	return padder.update(message) + padder.finalize()
+
+def getKey(key) :
+	with open("./public-key-mix-"+key+".pem", "rb") as key_file:
+		private_key = serialization.load_pem_public_key(
+			key_file.read(),
+			backend=default_backend()
+		)
+	return private_key
 
 def encryptAes(message):
 	'''applies AES encryption.'''
@@ -48,16 +46,19 @@ def encryptRSA(key, message):
 
 def appendLength(encryptedMessages):
 	'''prepends 4 bytes of length to each message in encryptedMessages'''
-	pass
+	
+	encryptLength=len(encryptedMessages)
+	return encryptLength.to_bytes(4, byteorder='big')+encryptedMessages
 
-def sendMessage(port, encryptedMessages):
+def sendMessage(msg):
 	'''send the encrypted messages'''
 	pass
 
 #First Step
 msg = buildPaddedMessage(b"Alice,16")
 aesLst=encryptAes(msg)
-key=getKey("1")
-#rsaMsg = encryptRSA(key, aesMsg)
-#finalMsg=appendLength(rsaMsg)
-#sendMessage(finalMsg)
+rsaMsg = encryptRSA(getKey("1"), aesLst[2] + aesLst[1])
+sendMessage(appendLength(rsaMsg+aesLst[2]+aesLst[1]))
+
+#sendMessage(appendLength(rsaMsg+aesLst[0]))
+#sendMessage(appendLength(rsaMsg+aesLst[0]))
