@@ -8,6 +8,7 @@ from cryptography.hazmat.primitives import padding as pd
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding 
 import os.path as p
+import socket
 
 #done
 def buildPaddedMessage(message) :
@@ -26,7 +27,6 @@ def getKey(key) :
 
 def encryptAes(message):
 	'''applies AES encryption.'''
-	print("encrypting AES")
 	key = os.urandom(16)
 	iv = os.urandom(16)
 	cipher = Cipher(algorithms.AES(key), modes.CBC(iv), default_backend())
@@ -50,15 +50,27 @@ def appendLength(encryptedMessages):
 	encryptLength=len(encryptedMessages)
 	return encryptLength.to_bytes(4, byteorder='big')+encryptedMessages
 
-def sendMessage(msg):
-	'''send the encrypted messages'''
-	pass
+def sendMessage(message) :
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect((socket.gethostbyname("pets.ewi.utwente.nl"), 55654))
+	s.send(message)
+	print(s.recv(1))
 
 #First Step
-msg = buildPaddedMessage(b"Alice,16")
-aesLst=encryptAes(msg)
-rsaMsg = encryptRSA(getKey("1"), aesLst[2] + aesLst[1])
-sendMessage(appendLength(rsaMsg+aesLst[2]+aesLst[1]))
+msg = buildPaddedMessage(b"Johnathan,16")
 
-#sendMessage(appendLength(rsaMsg+aesLst[0]))
-#sendMessage(appendLength(rsaMsg+aesLst[0]))
+aesLst = encryptAes(msg)
+rsaMsg = encryptRSA(getKey("3"), aesLst[2] + aesLst[1])
+msg = rsaMsg + aesLst[0]
+
+aesLst = encryptAes(msg)
+rsaMsg = encryptRSA(getKey("2"), aesLst[2] + aesLst[1])
+msg = rsaMsg + aesLst[0]
+
+aesLst = encryptAes(msg)
+rsaMsg = encryptRSA(getKey("1"), aesLst[2] + aesLst[1])
+msg = rsaMsg + aesLst[0]
+
+appended=appendLength(msg)
+
+sendMessage(appended)
