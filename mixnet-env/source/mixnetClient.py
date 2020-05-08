@@ -52,25 +52,26 @@ def appendLength(encryptedMessages):
 
 def sendMessage(message) :
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((socket.gethostbyname("pets.ewi.utwente.nl"), 55654))
+	s.connect((socket.gethostbyname("pets.ewi.utwente.nl"), 51271))
 	s.send(message)
 	print(s.recv(1))
 
 #First Step
-msg = buildPaddedMessage(b"Johnathan,16")
+msg = buildPaddedMessage(b"PET,16")
+aesLst=encryptAes(msg)
+rsaMsg=encryptRSA(getKey("3"), aesLst[2] + aesLst[1])
+msg=rsaMsg+aesLst[0]
 
-aesLst = encryptAes(msg)
-rsaMsg = encryptRSA(getKey("3"), aesLst[2] + aesLst[1])
-msg = rsaMsg + aesLst[0]
+#second round
+aesLst=encryptAes(msg)
+rsaMsg=encryptRSA(getKey("2"), aesLst[2]+aesLst[1])
+msg=rsaMsg+aesLst[0]
 
-aesLst = encryptAes(msg)
-rsaMsg = encryptRSA(getKey("2"), aesLst[2] + aesLst[1])
-msg = rsaMsg + aesLst[0]
-
-aesLst = encryptAes(msg)
-rsaMsg = encryptRSA(getKey("1"), aesLst[2] + aesLst[1])
-msg = rsaMsg + aesLst[0]
+#third round
+aesLst=encryptAes(msg)
+rsaMsg=encryptRSA(getKey("3"), aesLst[2]+aesLst[1])
+msg=rsaMsg+aesLst[0]
 
 appended=appendLength(msg)
 
-sendMessage(appended)
+sendMessage(appended) """
