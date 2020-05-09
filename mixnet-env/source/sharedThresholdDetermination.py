@@ -12,6 +12,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding 
 import os.path as p
 import socket
+from sys import argv
 
 #done
 def buildPaddedMessage(message) :
@@ -57,7 +58,7 @@ def sendMessage(message, port) :
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((socket.gethostbyname("pets.ewi.utwente.nl"), port))
 	s.send(message)
-	print(s.recv(1))
+	return s.recv(1)
 
 def determine(message, port) :
     """Just a function which groups together the functionality
@@ -84,7 +85,10 @@ def determine(message, port) :
 
     appended = appendLength(msg)
 
-    sendMessage(appended, port)
+    print(str(sendMessage(appended, port)))
 
-determine(b"test,test", 56003)
+determine( str("test,num: " + str(argv[1])).encode("UTF-8"), int(argv[2]))
+	
+	
+
 
