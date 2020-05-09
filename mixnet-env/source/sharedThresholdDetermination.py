@@ -1,3 +1,6 @@
+import cryptography
+import socket
+
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -50,30 +53,38 @@ def appendLength(encryptedMessages):
 	encryptLength=len(encryptedMessages)
 	return encryptLength.to_bytes(4, byteorder='big')+encryptedMessages
 
-def sendMessage(message) :
+def sendMessage(message, port) :
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((socket.gethostbyname("pets.ewi.utwente.nl"), 56444))
+	s.connect((socket.gethostbyname("pets.ewi.utwente.nl"), port))
 	s.send(message)
 	print(s.recv(1))
 
-#First Step
-msg = buildPaddedMessage(b"Testing")
-aesLst = encryptAes(msg)
-rsaMsg = encryptRSA(getKey("3"), aesLst[2] + aesLst[1])
-msg = rsaMsg + aesLst[0]
+def determine(message, port) :
+    """Just a function which groups together the functionality
+    of the mixnetClient.py script, into one, to make it easier
+    to use."""
 
-#second round
-msg = buildPaddedMessage(msg)
-aesLst = encryptAes(msg)
-rsaMsg = encryptRSA(getKey("2"), aesLst[2] + aesLst[1])
-msg = rsaMsg + aesLst[0]
+    #First Step
+    msg = buildPaddedMessage(message)
+    aesLst = encryptAes(msg)
+    rsaMsg = encryptRSA(getKey("3"), aesLst[2] + aesLst[1])
+    msg = rsaMsg + aesLst[0]
 
-#third round
-msg = buildPaddedMessage(msg)
-aesLst = encryptAes(msg)
-rsaMsg = encryptRSA(getKey("1"), aesLst[2] + aesLst[1])
-msg = rsaMsg + aesLst[0]
+    #second round
+    msg = buildPaddedMessage(msg)
+    aesLst = encryptAes(msg)
+    rsaMsg = encryptRSA(getKey("2"), aesLst[2] + aesLst[1])
+    msg = rsaMsg + aesLst[0]
 
-appended = appendLength(msg)
+    #third round
+    msg = buildPaddedMessage(msg)
+    aesLst = encryptAes(msg)
+    rsaMsg = encryptRSA(getKey("1"), aesLst[2] + aesLst[1])
+    msg = rsaMsg + aesLst[0]
 
-sendMessage(appended)
+    appended = appendLength(msg)
+
+    sendMessage(appended, port)
+
+determine(b"test,test", 56003)
+
