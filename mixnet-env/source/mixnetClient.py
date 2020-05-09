@@ -18,7 +18,7 @@ def buildPaddedMessage(message) :
 	return padder.update(message) + padder.finalize()
 
 def getKey(key) :
-	with open("./public-key-mix-"+key+".pem", "rb") as key_file:
+	with open("/home/kali/Downloads/PET/Assignment-1/petass1q1/mixnet-env/source/public-key-mix-"+key+".pem", "rb") as key_file:
 		private_key = serialization.load_pem_public_key(
 			key_file.read(),
 			backend=default_backend()
@@ -35,13 +35,13 @@ def encryptAes(message):
 	return [ct, key, iv]
 
 def encryptRSA(key, message):
-	return key.encrypt (
+	return key.encrypt(
 		message,
-		padding.OAEP(
-			mgf=padding.MGF1(algorithm=hashes.SHA256()),
-			algorithm=hashes.SHA256(),
-			label=None
-		)
+		padding = padding.OAEP(
+            mgf = padding.MGF1(hashes.SHA1()),
+            algorithm = hashes.SHA1(),
+            label = None,
+        )
 	)
 
 def appendLength(encryptedMessages):
@@ -52,26 +52,28 @@ def appendLength(encryptedMessages):
 
 def sendMessage(message) :
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((socket.gethostbyname("pets.ewi.utwente.nl"), 51271))
+	s.connect((socket.gethostbyname("pets.ewi.utwente.nl"), 55583))
 	s.send(message)
 	print(s.recv(1))
 
 #First Step
-msg = buildPaddedMessage(b"PET,16")
-aesLst=encryptAes(msg)
-rsaMsg=encryptRSA(getKey("3"), aesLst[2] + aesLst[1])
-msg=rsaMsg+aesLst[0]
+msg = buildPaddedMessage(b"PET,new message for you!")
+aesLst = encryptAes(msg)
+rsaMsg = encryptRSA(getKey("3"), aesLst[2] + aesLst[1])
+msg = rsaMsg + aesLst[0]
 
 #second round
-aesLst=encryptAes(msg)
-rsaMsg=encryptRSA(getKey("2"), aesLst[2]+aesLst[1])
-msg=rsaMsg+aesLst[0]
+msg = buildPaddedMessage(msg)
+aesLst = encryptAes(msg)
+rsaMsg = encryptRSA(getKey("2"), aesLst[2] + aesLst[1])
+msg = rsaMsg + aesLst[0]
 
 #third round
-aesLst=encryptAes(msg)
-rsaMsg=encryptRSA(getKey("3"), aesLst[2]+aesLst[1])
-msg=rsaMsg+aesLst[0]
+msg = buildPaddedMessage(msg)
+aesLst = encryptAes(msg)
+rsaMsg = encryptRSA(getKey("1"), aesLst[2] + aesLst[1])
+msg = rsaMsg + aesLst[0]
 
-appended=appendLength(msg)
+appended = appendLength(msg)
 
-sendMessage(appended) """
+sendMessage(appended)
