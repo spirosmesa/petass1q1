@@ -1,9 +1,9 @@
 #! /bin/bash
 
-outputCount=$( (ls ./logs | grep entry > out.txt) && (wc -l out.txt | grep -Eo '[[:digit:]]{4}') )
+outputCount=$( (ls ./$1 | grep entry > out.txt) && (wc -l out.txt | grep -Eo '[[:digit:]]{4}') )
 
-for i in $(seq 1 20); do
-	echo "entry message count $i: " $(wc -l ./logs/entry$i.txt)
-	echo "exit message count $i: " $(wc -l ./logs/exit$i.txt)
+for i in $(seq 1 60); do
+	echo "entry message count $i: " $(wc -l ./$1/entry$i.txt)
+	echo "exit message count $i: " $(wc -l ./$1/exit$i.txt)
 	echo ""
 done
