@@ -18,7 +18,7 @@ def buildPaddedMessage(message) :
 	return padder.update(message) + padder.finalize()
 
 def getKey(key) :
-	with open("/home/kali/Downloads/PET/Assignment-1/petass1q1/mixnet-env/source/public-key-mix-"+key+".pem", "rb") as key_file:
+	with open("./public-key-mix-"+key+".pem", "rb") as key_file:
 		private_key = serialization.load_pem_public_key(
 			key_file.read(),
 			backend=default_backend()
@@ -57,7 +57,7 @@ def sendMessage(message) :
 	print(s.recv(1))
 
 #First Step
-msg = buildPaddedMessage(b"PET,new message for you!")
+msg = buildPaddedMessage(b"PET,16")
 aesLst = encryptAes(msg)
 rsaMsg = encryptRSA(getKey("3"), aesLst[2] + aesLst[1])
 msg = rsaMsg + aesLst[0]
