@@ -9,6 +9,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding 
 import os.path as p
 import socket
+from sys import argv
 
 #done
 def buildPaddedMessage(message) :
@@ -52,12 +53,12 @@ def appendLength(encryptedMessages):
 
 def sendMessage(message) :
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((socket.gethostbyname("pets.ewi.utwente.nl"), 56444))
+	s.connect((socket.gethostbyname("pets.ewi.utwente.nl"), int(argv[1])))
 	s.send(message)
 	print(s.recv(1))
 
 #First Step
-msg = buildPaddedMessage(b"Testing")
+msg = buildPaddedMessage(b"Testing,testing")
 aesLst = encryptAes(msg)
 rsaMsg = encryptRSA(getKey("3"), aesLst[2] + aesLst[1])
 msg = rsaMsg + aesLst[0]
